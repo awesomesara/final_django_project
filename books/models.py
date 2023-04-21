@@ -21,6 +21,7 @@ class CategoryModel(models.Model):
 class AuthorModel(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    date_of_birth = models.DateField(null=True, blank=True)
 
     def __str__(self) -> str:
         return self.first_name + ' ' + self.last_name
@@ -36,7 +37,6 @@ class BookInstance(models.Model):
 
     @property
     def is_overdue(self):
-        """Determines if the book is overdue based on due date and current date."""
         return bool(self.due_back and date.today() > self.due_back)
 
     LOAN_STATUS = (
@@ -58,7 +58,4 @@ class BookInstance(models.Model):
         permissions = (("can_mark_returned", "Set book as returned"),)
 
     def __str__(self):
-        """String for representing the Model object."""
-        return '{0} ({1})'.format(self.id, self.books.title)
-
-
+        return '{0} ({1})'.format(self.id, self.book.title)
