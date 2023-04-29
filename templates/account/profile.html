@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+								<section id="banner">
+                                    <div class="content">
+									<header >
+										<h2>{{ request.user}}</h2>
+									</header>
+									<p>{{request.user}}</p>
+                                        <p>{{request.user.date_joined}}</p>
+                                </section>
+
+{% endblock %}
