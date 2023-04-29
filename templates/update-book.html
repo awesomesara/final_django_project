@@ -3,10 +3,6 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ book_form.as_p }}
-    {{ formset.management_form }}
-    {% for form in formset %}
-    {{ form }}
-    {% endfor %}
      <input class="btn btn-primary" type="submit" value="Submit">
 </form>
 

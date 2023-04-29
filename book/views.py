@@ -38,7 +38,7 @@ def add_category(request):
             return redirect('home')
 
     context = {'form': form}
-    return render(request, 'add_category.html', context)
+    return render(request, 'add.html', context)
 
 
 class MainPageView(ListView):
@@ -82,19 +82,19 @@ class BookDetailView(DetailView):
 
 class BookCreateView(CreateView):
     model = Book
-    template_name = 'add-book.html'
+    template_name = 'add.html'
     fields = '__all__'
     success_url = reverse_lazy('home')
 
 
 class BookUpdateView(UpdateView):
     model = Book
-    template_name = 'update-book.html'
+    template_name = 'add.html'
     fields = '__all__'
 
     def get_success_url(self):
-        pk = self.kwargs["pk"]
-        return reverse('book-detail', kwargs={"pk": pk})
+        pk = self.object.pk
+        return reverse('detail', kwargs={"pk": pk})
 
 
 class BookDeleteView(DeleteView):
@@ -114,19 +114,7 @@ def add_author(request):
             return redirect('home')
 
     context = {'form': form}
-    return render(request, 'add_authors.html', context)
-
-@login_required
-def add_author(request):
-    form = AuthorForm()
-    if request.method == 'POST':
-        form = AuthorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-
-    context = {'form': form}
-    return render(request, 'add_authors.html', context)
+    return render(request, 'add.html', context)
 
 
 class BorrowCreateView(CreateView):
