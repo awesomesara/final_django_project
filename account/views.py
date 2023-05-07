@@ -6,7 +6,6 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from account.forms import RegistrationForm
 from account.models import User
-from book.models import Borrower
 
 
 class RegisterView(CreateView, SuccessMessageMixin):
@@ -22,8 +21,9 @@ class RegisterView(CreateView, SuccessMessageMixin):
         user.set_password(password)
         user.save()
 
-        borrower = Borrower(user=user)
-        borrower.save()
+
+        user = User(email=user)
+        user.save()
 
         send_mail(
             'From library site',
@@ -31,7 +31,7 @@ class RegisterView(CreateView, SuccessMessageMixin):
             'forshipingsara@gmail.com',
             [user.email],
         )
-        response = User.form_valid(form)
+        response = RegisterView.form_valid(form)
         return response
 
 

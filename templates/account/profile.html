@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
@@ -6,10 +5,39 @@
 								<section id="banner">
                                     <div class="content">
 									<header >
-										<h2>{{ request.user}}</h2>
+										<h3>{{request.user.last_name}} {{request.user.first_name}}</h3>
+										<img src="{{request.user.image}}">
+										<h2>{{request.user}}</h2>
 									</header>
 									<p>{{request.user}}</p>
-                                        <p>{{request.user.date_joined}}</p>
+
                                 </section>
+
+
+    <h1>Borrowed books</h1>
+
+    {% if bookinstance_list %}
+    <ul>
+
+      {% for bookinst in bookinstance_list %}
+      <li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
+        <a href="{% url 'detail' bookinst.book.pk %}">{{bookinst.book.title}}</a> ({{ bookinst.due_back }})
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% else %}
+      <p>There are no books borrowed.</p>
+    {% endif %}
+
+<h1>{{ book.title }}</h1>
+<p>Author: {{ book.author }}</p>
+<p>Borrower: {{ book.borrower }}</p>
+<p>Date borrowed: {{ book.date_borrowed }}</p>
+{% if book.date_returned %}
+  <p>Date returned: {{ book.date_returned }}</p>
+{% else %}
+  <p>Penalty: {{ penalty }}</p>
+{% endif %}
 
 {% endblock %}

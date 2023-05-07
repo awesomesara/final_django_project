@@ -1,14 +1,13 @@
 from datetime import timedelta
-
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
+from django.views import generic
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
-
 from .forms import AuthorForm, CategoryForm
-from .models import Book, Exemplar, Borrower, Borrow, Category
+from .models import *
 from django.utils import timezone
 
 
@@ -38,7 +37,7 @@ def add_category(request):
             return redirect('home')
 
     context = {'form': form}
-    return render(request, 'add_category.html', context)
+    return render(request, 'add.html', context)
 
 
 class MainPageView(ListView):
@@ -75,26 +74,24 @@ class BookDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BookDetailView, self).get_context_data(**kwargs)
-        context['instances'] = len(Exemplar.objects.filter(book=context['book'].id))
-
         return context
 
 
 class BookCreateView(CreateView):
     model = Book
-    template_name = 'add-book.html'
+    template_name = 'add.html'
     fields = '__all__'
     success_url = reverse_lazy('home')
 
 
 class BookUpdateView(UpdateView):
     model = Book
-    template_name = 'update-book.html'
+    template_name = 'add.html'
     fields = '__all__'
 
     def get_success_url(self):
-        pk = self.kwargs["pk"]
-        return reverse('book-detail', kwargs={"pk": pk})
+        pk = self.object.pk
+        return reverse('detail', kwargs={"pk": pk})
 
 
 class BookDeleteView(DeleteView):
@@ -114,48 +111,56 @@ def add_author(request):
             return redirect('home')
 
     context = {'form': form}
-    return render(request, 'add_authors.html', context)
+    return render(request, 'add.html', context)
 
-@login_required
-def add_author(request):
-    form = AuthorForm()
-    if request.method == 'POST':
-        form = AuthorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
 
-    context = {'form': form}
-    return render(request, 'add_authors.html', context)
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
+class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
+    """Generic class-based view listing books on loan to current user."""
+    model = BookInstance
+    template_name = 'bookinstance_list_borrowed_user.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return (
+            BookInstance.objects.filter(borrower=self.request.user)
+            .filter(status__exact='o')
+            .order_by('due_back')
+        )
+
+
+# Added as part of challenge!
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
+
+class LoanedBooksAllListView(PermissionRequiredMixin, generic.ListView):
+    """Generic class-based view listing all books on loan. Only visible to users with can_mark_returned permission."""
+    model = BookInstance
+    permission_required = 'catalog.can_mark_returned'
+    template_name = 'bookinstance_list_borrowed_all.html'
+    paginate_by = 50
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(status__exact='o').order_by('due_back')
 
 
 class BorrowCreateView(CreateView):
-    model = Borrow
-    fields = ['borrower']
+    model = BookInstance
+    template_name = 'add.html'
+    fields = '__all__'
     success_url = reverse_lazy('home')
-    template_name = 'crud/create.html'
 
-    def form_valid(self, form):
-        last_borrow = Borrow.objects.filter(borrower=form.instance.borrower).last()
 
-        if form.instance.borrower.debt:
-            form.add_error('borrower', 'The user has\'t paid the fine')
+class BorrowDeleteView(DeleteView):
+    model = BookInstance
+    template_name = 'delete-book.html'
+    success_url = reverse_lazy('home')
+    success_message = 'Successfully deleted!'
 
-            return self.form_invalid(form)
 
-        if last_borrow is not None and timezone.now() < last_borrow.end:
-            form.add_error('borrower', 'The user has already borrowed a book')
-
-            return self.form_invalid(form)
-
-        exemplar = Exemplar.objects.get(id=self.kwargs['exemplar'])
-        exemplar.status = 0
-        exemplar.save()
-
-        form.instance.exemplar = exemplar
-
-        response = super().form_valid(form)
-        return response
-
-    def get_success_url(self):
-        return reverse_lazy('exemplar-detail', kwargs={'pk': self.object.exemplar.id})
+def book_detail(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
+    penalty = BookInstance.calculate_penalty(book)
+    return render(request, 'book_detail.html', {'book': book, 'penalty': penalty})

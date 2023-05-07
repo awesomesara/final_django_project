@@ -71,7 +71,6 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
                 ('status', models.IntegerField(choices=[(0, 'False'), (1, 'True')], default=1)),
                 ('start', models.DateTimeField(auto_now_add=True, null=True)),
-                ('end', models.DateTimeField(blank=True, default=book.models.get_time, null=True)),
                 ('borrower', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='book.borrower')),
                 ('exemplar', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='book.exemplar')),
             ],

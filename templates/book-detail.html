@@ -6,17 +6,16 @@
 										<h1>{{ book.title }}</h1>
 									</header>
 									<span class="image main"><img src="{{ book.get_image }}" style="width: auto; height: auto;" alt=""  /></span>
-
+									<h3>Author: {{ book.author }}</h3>
 									<p>Posted: {{ book.public_date }}</p>
                                     <p>Publisher: {{ book.publisher }}</p>
-                                    <p>Author: {{ book.author }} </p>
+									<p>{{book.description}}</p>
 
 									<hr class="major" />
-									{% for image in images %}
-									<img src="{{ image | default_if_none:'#' }}" style="width: 500px; height: 500px;" class="img-thumbnail" alt="...">
-									{% endfor %}
+									<img src="{{book.image}}" style="" class="img-thumbnail" alt="...">
 
-									           {% if request.user == book.publisher %}
+
+									           {% if request.user.is_superuser %}
 									<a href="{% url 'update-book' book.id %}" >update</a>
 										<a href="{% url 'delete-book' book.id %}" >delete</a>
 									{% endif %}
