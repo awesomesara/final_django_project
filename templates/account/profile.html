@@ -29,4 +29,15 @@
     {% else %}
       <p>There are no books borrowed.</p>
     {% endif %}
+
+<h1>{{ book.title }}</h1>
+<p>Author: {{ book.author }}</p>
+<p>Borrower: {{ book.borrower }}</p>
+<p>Date borrowed: {{ book.date_borrowed }}</p>
+{% if book.date_returned %}
+  <p>Date returned: {{ book.date_returned }}</p>
+{% else %}
+  <p>Penalty: {{ penalty }}</p>
+{% endif %}
+
 {% endblock %}

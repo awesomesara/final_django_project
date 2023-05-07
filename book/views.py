@@ -1,7 +1,7 @@
 from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views import generic
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -140,7 +140,7 @@ class LoanedBooksAllListView(PermissionRequiredMixin, generic.ListView):
     model = BookInstance
     permission_required = 'catalog.can_mark_returned'
     template_name = 'bookinstance_list_borrowed_all.html'
-    paginate_by = 2
+    paginate_by = 50
 
     def get_queryset(self):
         return BookInstance.objects.filter(status__exact='o').order_by('due_back')
@@ -158,3 +158,9 @@ class BorrowDeleteView(DeleteView):
     template_name = 'delete-book.html'
     success_url = reverse_lazy('home')
     success_message = 'Successfully deleted!'
+
+
+def book_detail(request, book_id):
+    book = get_object_or_404(Book, pk=book_id)
+    penalty = BookInstance.calculate_penalty(book)
+    return render(request, 'book_detail.html', {'book': book, 'penalty': penalty})

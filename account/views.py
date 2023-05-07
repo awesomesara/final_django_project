@@ -21,7 +21,8 @@ class RegisterView(CreateView, SuccessMessageMixin):
         user.set_password(password)
         user.save()
 
-        user = User(user=user)
+
+        user = User(email=user)
         user.save()
 
         send_mail(
@@ -30,7 +31,7 @@ class RegisterView(CreateView, SuccessMessageMixin):
             'forshipingsara@gmail.com',
             [user.email],
         )
-        response = User.form_valid(form)
+        response = RegisterView.form_valid(form)
         return response
 
 

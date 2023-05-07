@@ -59,6 +59,8 @@
 										<li><a href="{% url 'home' %}?filter=new">New books</a></li>
 										{% if request.user.is_authenticated %}
 										<li><a href="{% url 'profile' %}?filter=new">Profile</a></li>
+										<li><a href="{% url 'all-borrowed' %}">All Borrowed</a></li>
+
 
 										{% endif %}
 									</ul>

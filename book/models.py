@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from account.models import User
-from datetime import date
+from datetime import date, timedelta
 
 
 class Category(models.Model):
@@ -28,8 +28,7 @@ class Book(models.Model):
     publish_date = models.DateTimeField(auto_now_add=True)
     image = models.ImageField()
 
-    def __str__(self) -> str:
-        return self.title
+
 
 
 class BookInstance(models.Model):
@@ -38,6 +37,7 @@ class BookInstance(models.Model):
                           help_text="Unique ID for this particular book across whole library")
     book = models.ForeignKey('Book', on_delete=models.CASCADE, null=True)
     due_back = models.DateField(null=True, blank=True)
+    date_borrow = models.DateField(auto_now_add=True)
     borrower = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     @property
@@ -66,4 +66,15 @@ class BookInstance(models.Model):
     def __str__(self):
         """String for representing the Model object."""
         return '{0} ({1})'.format(self.id, self.book.title)
+
+    # def calculate_penalty(book):
+    #     if book.due_back is not None:
+    #         return 0
+    #     else:
+    #         due_date = self.book.date_borrow + timedelta(days=14)
+    #         days_overdue = (date.today() - due_date).days
+    #         return max(0, days_overdue * 0.50)
+
+    def __str__(self) -> str:
+        return self.title
 

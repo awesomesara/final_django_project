@@ -30,7 +30,7 @@ class CategoryForm(ModelForm):
 class BorrowForm(ModelForm):
     class Meta:
         model = BookInstance
-        fields = ['book', 'due_back', 'borrower', 'status']
+        fields = '__all__'
 
 
 

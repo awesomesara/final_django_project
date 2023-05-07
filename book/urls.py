@@ -11,5 +11,6 @@ urlpatterns = [
     path('delete-book/<int:pk>/', BookDeleteView.as_view(), name='delete-book'),
     path(r'borrowed/', LoanedBooksAllListView.as_view(), name='all-borrowed'),  # Added for challenge
     path('borrow/', BorrowCreateView.as_view(), name='borrow'),
+    path(r'borrowed/', LoanedBooksAllListView.as_view(), name='all-borrowed'),  # Added for challenge
 
 ]
