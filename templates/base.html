@@ -54,10 +54,12 @@
 										<li><a href="{% url 'add-book' %}">Add new Book</a></li>
 										<li><a href="{% url 'add-author' %}">Add new Author</a></li>
 										<li><a href="{% url 'add-category' %}">Add new Category</a></li>
+										<li><a href="{% url 'borrow' %}">Borrow</a></li>
 										{% endif %}
 										<li><a href="{% url 'home' %}?filter=new">New books</a></li>
 										{% if request.user.is_authenticated %}
 										<li><a href="{% url 'profile' %}?filter=new">Profile</a></li>
+
 										{% endif %}
 									</ul>
 								</nav>

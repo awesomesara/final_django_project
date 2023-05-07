@@ -1,8 +1,7 @@
-from django.db import models
 import uuid
+from django.db import models
 from account.models import User
-from datetime import datetime, timedelta
-from django.utils import timezone
+from datetime import date
 
 
 class Category(models.Model):
@@ -33,61 +32,38 @@ class Book(models.Model):
         return self.title
 
 
-class Exemplar(models.Model):
-    STATUS_CHOICES = (
-        (0, 'False'),
-        (1, 'True'),
+class BookInstance(models.Model):
+    """Model representing a specific copy of a book (i.e. that can be borrowed from the library)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
+                          help_text="Unique ID for this particular book across whole library")
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, null=True)
+    due_back = models.DateField(null=True, blank=True)
+    borrower = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
+    @property
+    def is_overdue(self):
+        """Determines if the book is overdue based on due date and current date."""
+        return bool(self.due_back and date.today() > self.due_back)
+
+    LOAN_STATUS = (
+        ('d', 'Maintenance'),
+        ('o', 'On loan'),
+        ('a', 'Available'),
+        ('r', 'Reserved'),
     )
 
-    book = models.ForeignKey('Book', on_delete=models.CASCADE)
-    code = models.CharField(max_length=20)
-    print_date = models.DateTimeField(auto_now_add=True)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
+    status = models.CharField(
+        max_length=1,
+        choices=LOAN_STATUS,
+        blank=True,
+        default='d',
+        help_text='Book availability')
 
     class Meta:
-        ordering = ['code']
+        ordering = ['due_back']
+        permissions = (("can_mark_returned", "Set book as returned"),)
 
     def __str__(self):
-        return f"{Book.objects.get(id=self.book.id).title} - {self.code}"
+        """String for representing the Model object."""
+        return '{0} ({1})'.format(self.id, self.book.title)
 
-
-class Borrower(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    debt = models.IntegerField(default=0)
-
-    class Meta:
-        ordering = ['id']
-
-    def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
-
-
-def get_time():
-    return datetime.now() + timedelta(seconds=15)
-
-
-class Borrow(models.Model):
-    STATUS_CHOICES = (
-        (0, 'False'),
-        (1, 'True'),
-    )
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    exemplar = models.ForeignKey('Exemplar', on_delete=models.CASCADE)
-    borrower = models.ForeignKey('Borrower', on_delete=models.CASCADE)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
-    start = models.DateTimeField(blank=True, null=True, auto_now_add=True)
-    end = models.DateTimeField(blank=True, null=True, default=get_time)
-
-    def __str__(self):
-        instance = Exemplar.objects.get(id=self.exemplar.id)
-        borrower = Borrower.objects.get(id=self.borrower.id)
-
-        return f"{borrower.user.first_name} {borrower.user.last_name} - {instance}"
-
-    def calculate_fine(self):
-        delta = (timezone.now() - self.end).seconds
-
-        if self.status and delta > 0:
-            self.borrower.debt = delta
-            self.borrower.save()
