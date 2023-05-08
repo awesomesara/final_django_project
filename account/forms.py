@@ -1,4 +1,5 @@
 from django import forms
+from django.core.mail import send_mail
 from account.models import User
 
 
@@ -21,6 +22,18 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError('User with given email already exists')
         return email
 
+
     def save(self, commit=True):
-        user = User.objects.create_user(**self.cleaned_data)
+        user = User.objects.create(**self.cleaned_data)
+        password = User.objects.make_random_password(length=8)
+        user.set_password(password)
+        user.save()
+
+        send_mail(
+            'From library site',
+            f'Your password for the {user.username} account is: {password}',
+            'librarynazsar@gmail.com',
+            [user.email],
+            fail_silently=False,
+        )
         return user

@@ -5,8 +5,8 @@
 <div class="posts">
 										{% for book in books %}
 										<article>
-											<a href="#" class="image"><img src="{{ book.image }}"  style="width: 200px; height: 200px;" alt="" /></a>
-											<h3>{{ book }}</h3>
+											<a href="#" class="image"><img src="{{ book.image.url }}"  style="width: 200px; height: 200px;" alt="" /></a>
+											<h3>{{ book.title }}</h3>
 											<p>{{ book.description| truncatewords:15 }}</p>
 											<ul class="actions">
 
