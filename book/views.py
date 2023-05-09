@@ -135,10 +135,9 @@ class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
-class LoanedBooksAllListView(PermissionRequiredMixin, generic.ListView):
+class LoanedBooksAllListView(generic.ListView):
     """Generic class-based view listing all books on loan. Only visible to users with can_mark_returned permission."""
     model = BookInstance
-    permission_required = 'catalog.can_mark_returned'
     template_name = 'bookinstance_list_borrowed_all.html'
     paginate_by = 50
 
@@ -159,8 +158,3 @@ class BorrowDeleteView(DeleteView):
     success_url = reverse_lazy('home')
     success_message = 'Successfully deleted!'
 
-
-def book_detail(request, book_id):
-    book = get_object_or_404(Book, pk=book_id)
-    penalty = BookInstance.calculate_penalty(book)
-    return render(request, 'book_detail.html', {'book': book, 'penalty': penalty})

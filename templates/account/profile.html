@@ -5,20 +5,18 @@
 								<section id="banner">
                                     <div class="content">
 									<header >
-										<h3>{{request.user.last_name}} {{request.user.first_name}}</h3>
-										<img src="{{request.user.image}}">
-										<h2>{{request.user}}</h2>
+										<h1>{{request.user.last_name}} {{request.user.first_name}}</h1>
+                                        {%if request.user.is_superuser%}
+                                        <img scr="https://www.google.com/url?sa=i&url=https%3A%2F%2Fcommons.wikimedia.org%2Fwiki%2FFile%3AUnknown_person.jpg&psig=AOvVaw0qyFXAwcYAXdJlGcbc_ZY4&ust=1683552312806000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCNj7rp6n4_4CFQAAAAAdAAAAABAE"
+										{%else%}
+                                        <img src="{{request.user.image.url}}" >
+                                        {%endif%}
 									</header>
-									<p>{{request.user}}</p>
-
                                 </section>
 
-
-    <h1>Borrowed books</h1>
-
+    <h3>Borrowed books</h3>
     {% if bookinstance_list %}
     <ul>
-
       {% for bookinst in bookinstance_list %}
       <li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
         <a href="{% url 'detail' bookinst.book.pk %}">{{bookinst.book.title}}</a> ({{ bookinst.due_back }})
@@ -31,8 +29,6 @@
     {% endif %}
 
 <h1>{{ book.title }}</h1>
-<p>Author: {{ book.author }}</p>
-<p>Borrower: {{ book.borrower }}</p>
 <p>Date borrowed: {{ book.date_borrowed }}</p>
 {% if book.date_returned %}
   <p>Date returned: {{ book.date_returned }}</p>
